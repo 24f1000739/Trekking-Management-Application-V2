@@ -1,0 +1,52 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# C extensions & executables
+*.exe
+*.dll
+*.pdb
+
+# Local environment & virtual environments
+.env
+.venv/
+venv/
+env/
+ENV/
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+instance/
+backend/instance/
+
+# Redis artifacts
+dump.rdb
+redis/
+
+# Celery artifacts
+celerybeat-schedule*
+*.pid
+
+# Data exports and reports
+exports/*.csv
+backend/exports/*.csv
+reports/*.html
+backend/reports/*.html
+
+# Node / Frontend build artifacts (if applicable)
+node_modules/
+dist/
+.cache/
+
+# IDE & OS files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
