@@ -1,0 +1,38 @@
+{% extends "dashboard_base.html" %}
+{% from "macros.html" import status_badge %}
+{% set role = 'user' %}
+
+{% block title %}Booking Confirmed{% endblock %}
+{% block page_title %}Booking Confirmation{% endblock %}
+
+{% block sidebar %}
+<a href="{{ url_for('user.dashboard') }}" class="nav-link"><i class="bi bi-speedometer2"></i>Dashboard</a>
+<a href="{{ url_for('user.treks') }}" class="nav-link"><i class="bi bi-search"></i>Browse Treks</a>
+<a href="{{ url_for('user.my_bookings') }}" class="nav-link active"><i class="bi bi-calendar-check"></i>My Bookings</a>
+<a href="{{ url_for('user.trekking_history') }}" class="nav-link"><i class="bi bi-clock-history"></i>Trekking History</a>
+<a href="{{ url_for('user.profile') }}" class="nav-link"><i class="bi bi-person"></i>Profile</a>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card content-card text-center">
+            <div class="card-body p-5">
+                <i class="bi bi-check-circle-fill text-success display-1 mb-3"></i>
+                <h3>Booking Confirmed!</h3>
+                <p class="text-muted">Your trek has been successfully booked.</p>
+                <hr>
+                <p><strong>Booking ID:</strong> #{{ booking.id }}</p>
+                <p><strong>Trek:</strong> {{ booking.trek.name }}</p>
+                <p><strong>Location:</strong> {{ booking.trek.location }}</p>
+                <p><strong>Dates:</strong> {{ booking.trek.start_date.strftime('%d %b %Y') }} — {{ booking.trek.end_date.strftime('%d %b %Y') }}</p>
+                <p><strong>Status:</strong> {{ status_badge(booking.status) }}</p>
+                <div class="d-grid gap-2 mt-4">
+                    <a href="{{ url_for('user.my_bookings') }}" class="btn btn-primary">View My Bookings</a>
+                    <a href="{{ url_for('user.dashboard') }}" class="btn btn-outline-secondary">Go to Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
