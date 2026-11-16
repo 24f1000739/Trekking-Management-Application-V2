@@ -1,0 +1,112 @@
+{% extends "dashboard_base.html" %}
+{% from "macros.html" import status_badge, difficulty_badge %}
+{% set role = 'user' %}
+
+{% block title %}User Dashboard{% endblock %}
+{% block page_title %}Welcome, {{ current_user.name }}!{% endblock %}
+
+{% block sidebar %}
+<a href="{{ url_for('user.dashboard') }}" class="nav-link active"><i class="bi bi-speedometer2"></i>Dashboard</a>
+<a href="{{ url_for('user.treks') }}" class="nav-link"><i class="bi bi-search"></i>Browse Treks</a>
+<a href="{{ url_for('user.my_bookings') }}" class="nav-link"><i class="bi bi-calendar-check"></i>My Bookings</a>
+<a href="{{ url_for('user.trekking_history') }}" class="nav-link"><i class="bi bi-clock-history"></i>Trekking History</a>
+<a href="{{ url_for('user.profile') }}" class="nav-link"><i class="bi bi-person"></i>Profile</a>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="card stat-card">
+            <div class="card-body d-flex align-items-center">
+                <div class="stat-icon bg-primary bg-opacity-10 text-primary me-3">
+                    <i class="bi bi-calendar-check"></i>
+                </div>
+                <div>
+                    <h3 class="mb-0">{{ booked_count }}</h3>
+                    <small class="text-muted">Active Bookings</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card stat-card">
+            <div class="card-body d-flex align-items-center">
+                <div class="stat-icon bg-success bg-opacity-10 text-success me-3">
+                    <i class="bi bi-trophy"></i>
+                </div>
+                <div>
+                    <h3 class="mb-0">{{ completed_count }}</h3>
+                    <small class="text-muted">Completed Treks</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card content-card">
+            <div class="card-header bg-white border-0 pt-3 d-flex justify-content-between">
+                <h6 class="mb-0"><i class="bi bi-signpost-split me-2"></i>Available Treks</h6>
+                <a href="{{ url_for('user.treks') }}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body p-0">
+                {% if available_treks %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Trek</th>
+                                <th>Location</th>
+                                <th>Difficulty</th>
+                                <th>Slots</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for trek in available_treks %}
+                            <tr>
+                                <td><strong>{{ trek.name }}</strong></td>
+                                <td>{{ trek.location }}</td>
+                                <td>{{ difficulty_badge(trek.difficulty) }}</td>
+                                <td>{{ trek.available_slots }}</td>
+                                <td>
+                                    <a href="{{ url_for('user.trek_detail', trek_id=trek.id) }}" class="btn btn-sm btn-primary">Book Now</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state"><i class="bi bi-signpost-split d-block"></i><p>No open treks available</p></div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card content-card">
+            <div class="card-header bg-white border-0 pt-3">
+                <h6 class="mb-0"><i class="bi bi-calendar-check me-2"></i>Recent Bookings</h6>
+            </div>
+            <div class="card-body p-0">
+                {% if my_bookings %}
+                <ul class="list-group list-group-flush">
+                    {% for booking in my_bookings %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>{{ booking.trek.name }}</strong>
+                            <br><small class="text-muted">{{ booking.booking_date.strftime('%d %b %Y') }}</small>
+                        </div>
+                        {{ status_badge(booking.status) }}
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="empty-state"><i class="bi bi-calendar d-block"></i><p>No bookings yet</p></div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

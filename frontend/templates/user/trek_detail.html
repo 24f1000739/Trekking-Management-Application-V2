@@ -1,0 +1,86 @@
+{% extends "dashboard_base.html" %}
+{% from "macros.html" import status_badge, difficulty_badge %}
+{% set role = 'user' %}
+
+{% block title %}{{ trek.name }}{% endblock %}
+{% block page_title %}{{ trek.name }}{% endblock %}
+
+{% block sidebar %}
+<a href="{{ url_for('user.dashboard') }}" class="nav-link"><i class="bi bi-speedometer2"></i>Dashboard</a>
+<a href="{{ url_for('user.treks') }}" class="nav-link active"><i class="bi bi-search"></i>Browse Treks</a>
+<a href="{{ url_for('user.my_bookings') }}" class="nav-link"><i class="bi bi-calendar-check"></i>My Bookings</a>
+<a href="{{ url_for('user.trekking_history') }}" class="nav-link"><i class="bi bi-clock-history"></i>Trekking History</a>
+<a href="{{ url_for('user.profile') }}" class="nav-link"><i class="bi bi-person"></i>Profile</a>
+{% endblock %}
+
+{% block content %}
+<div class="trek-hero mb-4">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h2 class="mb-2">{{ trek.name }}</h2>
+            <p class="mb-0 opacity-75"><i class="bi bi-geo-alt me-1"></i>{{ trek.location }}</p>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            {{ difficulty_badge(trek.difficulty) }}
+            {{ status_badge(trek.status) }}
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card content-card">
+            <div class="card-body p-4">
+                <h5>About This Trek</h5>
+                <p>{{ trek.description or 'No description available for this trek.' }}</p>
+                <hr>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <small class="text-muted d-block">Duration</small>
+                        <strong>{{ trek.duration }} days</strong>
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted d-block">Start Date</small>
+                        <strong>{{ trek.start_date.strftime('%d %b %Y') }}</strong>
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted d-block">End Date</small>
+                        <strong>{{ trek.end_date.strftime('%d %b %Y') }}</strong>
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted d-block">Available Slots</small>
+                        <strong>{{ trek.available_slots }} / {{ trek.total_slots }}</strong>
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted d-block">Assigned Staff</small>
+                        <strong>{{ trek.assigned_staff.name if trek.assigned_staff else 'TBA' }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card content-card">
+            <div class="card-body p-4 text-center">
+                <h5 class="mb-3">Book This Trek</h5>
+                {% if existing_booking %}
+                <div class="alert alert-info">You have already booked this trek.</div>
+                <a href="{{ url_for('user.my_bookings') }}" class="btn btn-outline-primary w-100">View My Bookings</a>
+                {% elif trek.is_bookable() %}
+                <form method="POST" action="{{ url_for('user.book_trek', trek_id=trek.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                        <i class="bi bi-calendar-plus me-1"></i>Book Now
+                    </button>
+                </form>
+                {% elif trek.status != 'Open' %}
+                <div class="alert alert-warning">This trek is not open for booking.</div>
+                {% else %}
+                <div class="alert alert-danger">No slots available. Trek is fully booked.</div>
+                {% endif %}
+                <a href="{{ url_for('user.treks') }}" class="btn btn-outline-secondary w-100 mt-2">Back to Treks</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

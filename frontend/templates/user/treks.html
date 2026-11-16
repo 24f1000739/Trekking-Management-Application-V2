@@ -1,0 +1,85 @@
+{% extends "dashboard_base.html" %}
+{% from "macros.html" import status_badge, difficulty_badge %}
+{% set role = 'user' %}
+
+{% block title %}Browse Treks{% endblock %}
+{% block page_title %}Browse & Search Treks{% endblock %}
+
+{% block sidebar %}
+<a href="{{ url_for('user.dashboard') }}" class="nav-link"><i class="bi bi-speedometer2"></i>Dashboard</a>
+<a href="{{ url_for('user.treks') }}" class="nav-link active"><i class="bi bi-search"></i>Browse Treks</a>
+<a href="{{ url_for('user.my_bookings') }}" class="nav-link"><i class="bi bi-calendar-check"></i>My Bookings</a>
+<a href="{{ url_for('user.trekking_history') }}" class="nav-link"><i class="bi bi-clock-history"></i>Trekking History</a>
+<a href="{{ url_for('user.profile') }}" class="nav-link"><i class="bi bi-person"></i>Profile</a>
+{% endblock %}
+
+{% block content %}
+<div class="card content-card mb-4">
+    <div class="card-body p-4">
+        <form method="GET" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label">Search</label>
+                <input type="text" name="q" class="form-control" placeholder="Trek name or location..." value="{{ search }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Location</label>
+                <input type="text" name="location" class="form-control" placeholder="Filter by location..." value="{{ location }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Difficulty</label>
+                <select name="difficulty" class="form-select">
+                    <option value="">All Difficulties</option>
+                    <option value="Easy" {% if difficulty == 'Easy' %}selected{% endif %}>Easy</option>
+                    <option value="Moderate" {% if difficulty == 'Moderate' %}selected{% endif %}>Moderate</option>
+                    <option value="Hard" {% if difficulty == 'Hard' %}selected{% endif %}>Hard</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel me-1"></i>Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card content-card">
+    <div class="card-body p-0">
+        {% if treks %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Trek Name</th>
+                        <th>Location</th>
+                        <th>Difficulty</th>
+                        <th>Duration</th>
+                        <th>Dates</th>
+                        <th>Slots</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for trek in treks %}
+                    <tr>
+                        <td><strong>{{ trek.name }}</strong></td>
+                        <td>{{ trek.location }}</td>
+                        <td>{{ difficulty_badge(trek.difficulty) }}</td>
+                        <td>{{ trek.duration }} days</td>
+                        <td>{{ trek.start_date.strftime('%d %b') }} - {{ trek.end_date.strftime('%d %b %Y') }}</td>
+                        <td>{{ trek.available_slots }}</td>
+                        <td>
+                            <a href="{{ url_for('user.trek_detail', trek_id=trek.id) }}" class="btn btn-sm btn-primary">View & Book</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="bi bi-search d-block"></i>
+            <p>No treks match your filters. Try adjusting your search criteria.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

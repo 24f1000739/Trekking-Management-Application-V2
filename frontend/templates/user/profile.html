@@ -1,0 +1,45 @@
+{% extends "dashboard_base.html" %}
+{% set role = 'user' %}
+
+{% block title %}My Profile{% endblock %}
+{% block page_title %}Edit Profile{% endblock %}
+
+{% block sidebar %}
+<a href="{{ url_for('user.dashboard') }}" class="nav-link"><i class="bi bi-speedometer2"></i>Dashboard</a>
+<a href="{{ url_for('user.treks') }}" class="nav-link"><i class="bi bi-search"></i>Browse Treks</a>
+<a href="{{ url_for('user.my_bookings') }}" class="nav-link"><i class="bi bi-calendar-check"></i>My Bookings</a>
+<a href="{{ url_for('user.trekking_history') }}" class="nav-link"><i class="bi bi-clock-history"></i>Trekking History</a>
+<a href="{{ url_for('user.profile') }}" class="nav-link active"><i class="bi bi-person"></i>Profile</a>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card content-card">
+            <div class="card-body p-4">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.name.label.text }}</label>
+                        {{ form.name(class="form-control") }}
+                        {% for e in form.name.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.email.label.text }}</label>
+                        {{ form.email(class="form-control") }}
+                        {% for e in form.email.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.phone.label.text }}</label>
+                        {{ form.phone(class="form-control") }}
+                        {% for e in form.phone.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                    </div>
+                    <div class="d-grid">
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
