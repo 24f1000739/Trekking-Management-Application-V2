@@ -1,0 +1,136 @@
+{% extends "dashboard_base.html" %}
+{% from "macros.html" import status_badge, difficulty_badge %}
+{% set role = 'admin' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+{% block page_title %}Admin Dashboard{% endblock %}
+
+{% block sidebar %}
+<a href="{{ url_for('admin.dashboard') }}" class="nav-link active"><i class="bi bi-speedometer2"></i>Dashboard</a>
+<a href="{{ url_for('admin.treks') }}" class="nav-link"><i class="bi bi-signpost-split"></i>Manage Treks</a>
+<a href="{{ url_for('admin.staff_list') }}" class="nav-link"><i class="bi bi-people"></i>Manage Staff</a>
+<a href="{{ url_for('admin.users') }}" class="nav-link"><i class="bi bi-person-lines-fill"></i>Users</a>
+<a href="{{ url_for('admin.bookings') }}" class="nav-link"><i class="bi bi-calendar-check"></i>Bookings</a>
+<a href="{{ url_for('admin.search') }}" class="nav-link"><i class="bi bi-search"></i>Search</a>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="card-body d-flex align-items-center">
+                <div class="stat-icon bg-primary bg-opacity-10 text-primary me-3">
+                    <i class="bi bi-signpost-split"></i>
+                </div>
+                <div>
+                    <h3 class="mb-0">{{ total_treks }}</h3>
+                    <small class="text-muted">Total Treks</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="card-body d-flex align-items-center">
+                <div class="stat-icon bg-success bg-opacity-10 text-success me-3">
+                    <i class="bi bi-person-lines-fill"></i>
+                </div>
+                <div>
+                    <h3 class="mb-0">{{ total_users }}</h3>
+                    <small class="text-muted">Total Users</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="card-body d-flex align-items-center">
+                <div class="stat-icon bg-warning bg-opacity-10 text-warning me-3">
+                    <i class="bi bi-people"></i>
+                </div>
+                <div>
+                    <h3 class="mb-0">{{ total_staff }}</h3>
+                    <small class="text-muted">Total Staff</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="card-body d-flex align-items-center">
+                <div class="stat-icon bg-info bg-opacity-10 text-info me-3">
+                    <i class="bi bi-calendar-check"></i>
+                </div>
+                <div>
+                    <h3 class="mb-0">{{ total_bookings }}</h3>
+                    <small class="text-muted">Total Bookings</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card content-card">
+            <div class="card-header bg-white border-0 pt-3">
+                <h6 class="mb-0"><i class="bi bi-clock-history me-2"></i>Recent Bookings</h6>
+            </div>
+            <div class="card-body p-0">
+                {% if recent_bookings %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>User</th>
+                                <th>Trek</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for booking in recent_bookings %}
+                            <tr>
+                                <td>#{{ booking.id }}</td>
+                                <td>{{ booking.user.name }}</td>
+                                <td>{{ booking.trek.name }}</td>
+                                <td>{{ booking.booking_date.strftime('%d %b %Y') }}</td>
+                                <td>{{ status_badge(booking.status) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state"><i class="bi bi-inbox d-block"></i><p>No bookings yet</p></div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card content-card">
+            <div class="card-header bg-white border-0 pt-3">
+                <h6 class="mb-0"><i class="bi bi-person-plus me-2"></i>Pending Staff Requests</h6>
+            </div>
+            <div class="card-body p-0">
+                {% if pending_staff %}
+                <div class="list-group list-group-flush">
+                    {% for staff in pending_staff %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>{{ staff.name }}</strong>
+                            <br><small class="text-muted">{{ staff.email }}</small>
+                        </div>
+                        <a href="{{ url_for('admin.staff_list', status='pending') }}" class="btn btn-sm btn-outline-primary">Review</a>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state"><i class="bi bi-check-circle d-block"></i><p>No pending requests</p></div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

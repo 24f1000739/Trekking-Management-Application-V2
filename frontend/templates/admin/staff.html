@@ -1,0 +1,86 @@
+{% extends "dashboard_base.html" %}
+{% from "macros.html" import status_badge %}
+{% set role = 'admin' %}
+
+{% block title %}Manage Staff{% endblock %}
+{% block page_title %}Manage Staff{% endblock %}
+
+{% block sidebar %}
+<a href="{{ url_for('admin.dashboard') }}" class="nav-link"><i class="bi bi-speedometer2"></i>Dashboard</a>
+<a href="{{ url_for('admin.treks') }}" class="nav-link"><i class="bi bi-signpost-split"></i>Manage Treks</a>
+<a href="{{ url_for('admin.staff_list') }}" class="nav-link active"><i class="bi bi-people"></i>Manage Staff</a>
+<a href="{{ url_for('admin.users') }}" class="nav-link"><i class="bi bi-person-lines-fill"></i>Users</a>
+<a href="{{ url_for('admin.bookings') }}" class="nav-link"><i class="bi bi-calendar-check"></i>Bookings</a>
+<a href="{{ url_for('admin.search') }}" class="nav-link"><i class="bi bi-search"></i>Search</a>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <ul class="nav nav-pills">
+        <li class="nav-item"><a class="nav-link {% if status_filter == 'all' %}active{% endif %}" href="{{ url_for('admin.staff_list', status='all') }}">All</a></li>
+        <li class="nav-item"><a class="nav-link {% if status_filter == 'pending' %}active{% endif %}" href="{{ url_for('admin.staff_list', status='pending') }}">Pending</a></li>
+        <li class="nav-item"><a class="nav-link {% if status_filter == 'approved' %}active{% endif %}" href="{{ url_for('admin.staff_list', status='approved') }}">Approved</a></li>
+        <li class="nav-item"><a class="nav-link {% if status_filter == 'blacklisted' %}active{% endif %}" href="{{ url_for('admin.staff_list', status='blacklisted') }}">Blacklisted</a></li>
+    </ul>
+    <form method="GET" class="d-flex gap-2" style="max-width: 300px;">
+        <input type="hidden" name="status" value="{{ status_filter }}">
+        <input type="text" name="q" class="form-control form-control-sm" placeholder="Search..." value="{{ search }}">
+        <button type="submit" class="btn btn-sm btn-outline-primary"><i class="bi bi-search"></i></button>
+    </form>
+</div>
+
+<div class="card content-card">
+    <div class="card-body p-0">
+        {% if staff_members %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for staff in staff_members %}
+                    <tr>
+                        <td>#{{ staff.id }}</td>
+                        <td><strong>{{ staff.name }}</strong></td>
+                        <td>{{ staff.email }}</td>
+                        <td>{{ staff.phone }}</td>
+                        <td>
+                            {% if staff.blacklisted %}{{ status_badge('Blacklisted') }}
+                            {% else %}{{ status_badge(staff.status|capitalize) }}{% endif %}
+                        </td>
+                        <td>
+                            {% if staff.status == 'pending' and not staff.blacklisted %}
+                            <form method="POST" action="{{ url_for('admin.approve_staff', staff_id=staff.id) }}" class="d-inline">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button class="btn btn-sm btn-success">Approve</button>
+                            </form>
+                            <form method="POST" action="{{ url_for('admin.reject_staff', staff_id=staff.id) }}" class="d-inline">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button class="btn btn-sm btn-warning">Reject</button>
+                            </form>
+                            {% endif %}
+                            {% if not staff.blacklisted %}
+                            <form method="POST" action="{{ url_for('admin.blacklist_staff', staff_id=staff.id) }}" class="d-inline">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button class="btn btn-sm btn-outline-danger">Blacklist</button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state"><i class="bi bi-people d-block"></i><p>No staff found</p></div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

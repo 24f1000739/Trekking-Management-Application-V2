@@ -1,0 +1,81 @@
+{% extends "dashboard_base.html" %}
+{% from "macros.html" import status_badge %}
+{% set role = 'admin' %}
+
+{% block title %}Search{% endblock %}
+{% block page_title %}Global Search{% endblock %}
+
+{% block sidebar %}
+<a href="{{ url_for('admin.dashboard') }}" class="nav-link"><i class="bi bi-speedometer2"></i>Dashboard</a>
+<a href="{{ url_for('admin.treks') }}" class="nav-link"><i class="bi bi-signpost-split"></i>Manage Treks</a>
+<a href="{{ url_for('admin.staff_list') }}" class="nav-link"><i class="bi bi-people"></i>Manage Staff</a>
+<a href="{{ url_for('admin.users') }}" class="nav-link"><i class="bi bi-person-lines-fill"></i>Users</a>
+<a href="{{ url_for('admin.bookings') }}" class="nav-link"><i class="bi bi-calendar-check"></i>Bookings</a>
+<a href="{{ url_for('admin.search') }}" class="nav-link active"><i class="bi bi-search"></i>Search</a>
+{% endblock %}
+
+{% block content %}
+<div class="card content-card mb-4">
+    <div class="card-body p-4">
+        <form method="GET">
+            <div class="input-group">
+                <input type="text" name="q" class="form-control form-control-lg" placeholder="Search treks, users, or staff by name or ID..." value="{{ query }}">
+                <button type="submit" class="btn btn-primary btn-lg"><i class="bi bi-search me-1"></i>Search</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if query %}
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card content-card">
+            <div class="card-header bg-white"><h6 class="mb-0">Treks ({{ treks_results|length }})</h6></div>
+            <div class="card-body p-0">
+                {% if treks_results %}
+                <ul class="list-group list-group-flush">
+                    {% for trek in treks_results %}
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>#{{ trek.id }} {{ trek.name }}</span>
+                        {{ status_badge(trek.status) }}
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}<p class="text-muted p-3 mb-0">No treks found</p>{% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card content-card">
+            <div class="card-header bg-white"><h6 class="mb-0">Users ({{ users_results|length }})</h6></div>
+            <div class="card-body p-0">
+                {% if users_results %}
+                <ul class="list-group list-group-flush">
+                    {% for user in users_results %}
+                    <li class="list-group-item">#{{ user.id }} {{ user.name }} — {{ user.email }}</li>
+                    {% endfor %}
+                </ul>
+                {% else %}<p class="text-muted p-3 mb-0">No users found</p>{% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card content-card">
+            <div class="card-header bg-white"><h6 class="mb-0">Staff ({{ staff_results|length }})</h6></div>
+            <div class="card-body p-0">
+                {% if staff_results %}
+                <ul class="list-group list-group-flush">
+                    {% for staff in staff_results %}
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>#{{ staff.id }} {{ staff.name }}</span>
+                        {{ status_badge(staff.status|capitalize) }}
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}<p class="text-muted p-3 mb-0">No staff found</p>{% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

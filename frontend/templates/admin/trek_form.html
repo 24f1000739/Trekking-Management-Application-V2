@@ -1,0 +1,85 @@
+{% extends "dashboard_base.html" %}
+{% set role = 'admin' %}
+
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block sidebar %}
+<a href="{{ url_for('admin.dashboard') }}" class="nav-link"><i class="bi bi-speedometer2"></i>Dashboard</a>
+<a href="{{ url_for('admin.treks') }}" class="nav-link active"><i class="bi bi-signpost-split"></i>Manage Treks</a>
+<a href="{{ url_for('admin.staff_list') }}" class="nav-link"><i class="bi bi-people"></i>Manage Staff</a>
+<a href="{{ url_for('admin.users') }}" class="nav-link"><i class="bi bi-person-lines-fill"></i>Users</a>
+<a href="{{ url_for('admin.bookings') }}" class="nav-link"><i class="bi bi-calendar-check"></i>Bookings</a>
+<a href="{{ url_for('admin.search') }}" class="nav-link"><i class="bi bi-search"></i>Search</a>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card content-card">
+            <div class="card-body p-4">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form.name.label.text }}</label>
+                            {{ form.name(class="form-control") }}
+                            {% for e in form.name.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form.location.label.text }}</label>
+                            {{ form.location(class="form-control") }}
+                            {% for e in form.location.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{{ form.difficulty.label.text }}</label>
+                            {{ form.difficulty(class="form-select") }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{{ form.duration.label.text }}</label>
+                            {{ form.duration(class="form-control") }}
+                            {% for e in form.duration.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{{ form.status.label.text }}</label>
+                            {{ form.status(class="form-select") }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{{ form.total_slots.label.text }}</label>
+                            {{ form.total_slots(class="form-control") }}
+                            {% for e in form.total_slots.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{{ form.available_slots.label.text }}</label>
+                            {{ form.available_slots(class="form-control") }}
+                            {% for e in form.available_slots.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{{ form.assigned_staff_id.label.text }}</label>
+                            {{ form.assigned_staff_id(class="form-select") }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form.start_date.label.text }}</label>
+                            {{ form.start_date(class="form-control", type="date") }}
+                            {% for e in form.start_date.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ form.end_date.label.text }}</label>
+                            {{ form.end_date(class="form-control", type="date") }}
+                            {% for e in form.end_date.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">{{ form.description.label.text }}</label>
+                            {{ form.description(class="form-control", rows=4) }}
+                        </div>
+                    </div>
+                    <div class="mt-4 d-flex gap-2">
+                        {{ form.submit(class="btn btn-primary") }}
+                        <a href="{{ url_for('admin.treks') }}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
