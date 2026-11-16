@@ -1,0 +1,20 @@
+{% macro status_badge(status) %}
+{% set status_lower = status|lower %}
+{% if status_lower in ['open', 'completed', 'approved', 'booked'] %}
+<span class="badge badge-open rounded-pill px-3">{{ status }}</span>
+{% elif status_lower in ['closed', 'cancelled', 'blacklisted', 'rejected'] %}
+<span class="badge badge-closed rounded-pill px-3">{{ status }}</span>
+{% else %}
+<span class="badge badge-pending rounded-pill px-3">{{ status }}</span>
+{% endif %}
+{% endmacro %}
+
+{% macro difficulty_badge(difficulty) %}
+{% if difficulty == 'Easy' %}
+<span class="badge bg-success rounded-pill">{{ difficulty }}</span>
+{% elif difficulty == 'Moderate' %}
+<span class="badge bg-warning text-dark rounded-pill">{{ difficulty }}</span>
+{% else %}
+<span class="badge bg-danger rounded-pill">{{ difficulty }}</span>
+{% endif %}
+{% endmacro %}
