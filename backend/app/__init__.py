@@ -22,13 +22,21 @@ def create_app(config_class=Config):
     template_dir = os.path.join(frontend_dir, 'templates') if os.path.isdir(os.path.join(frontend_dir, 'templates')) else os.path.join(backend_app_dir, 'templates')
     static_dir = os.path.join(frontend_dir, 'static') if os.path.isdir(os.path.join(frontend_dir, 'static')) else os.path.join(backend_app_dir, 'static')
 
-    app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
+    app = Flask(__name__, instance_path=os.path.join(project_root, 'instance'), template_folder=template_dir, static_folder=static_dir)
     app.config.from_object(config_class)
 
     # Ensure necessary folders exist
     os.makedirs(app.instance_path, exist_ok=True)
+    os.makedirs(os.path.join(project_root, 'instance'), exist_ok=True)
     os.makedirs(app.config.get('EXPORT_DIRECTORY', os.path.join(project_root, 'exports')), exist_ok=True)
     os.makedirs(app.config.get('REPORT_DIRECTORY', os.path.join(project_root, 'reports')), exist_ok=True)
+
+    # Ensure directory for SQLite database file exists
+    db_uri = app.config.get('SQLALCHEMY_DATABASE_URI', '')
+    if db_uri.startswith('sqlite:///'):
+        db_path = db_uri.replace('sqlite:///', '')
+        if db_path != ':memory:':
+            os.makedirs(os.path.dirname(os.path.abspath(db_path)), exist_ok=True)
 
     # Initialize extensions
     db.init_app(app)
