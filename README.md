@@ -104,7 +104,7 @@ You can run the application directly from the root directory or from the `backen
 # Option A: From root directory
 python app.py
 
-# Option B: From backend directory
+# Option B: From backend directory 
 cd backend
 python app.py
 ```
@@ -112,13 +112,24 @@ The server will initialize the SQLite database (`instance/trekking_v2.db`), seed
 👉 **`http://127.0.0.1:5000`**
 
 ### 5. Run Celery Worker & Beat (Optional for Background Jobs)
-In separate terminal windows:
-```bash
-# Start Celery Worker (Windows)
-celery -A backend.app.celery_app worker --loglevel=info -P solo
 
-# Start Celery Beat (Periodic Scheduler)
+> **Prerequisite:** Make sure Redis server is running first!
+> ```bash
+> # In a separate terminal, start Redis:
+> redis-server
+> # Or on Windows using default installation:
+> "C:\Program Files\Redis\redis-server.exe"
+> ```
+
+In separate terminal windows (with virtual environment activated `venv\Scripts\activate`):
+```bash
+# Option A: From project root directory:
+celery -A backend.app.celery_app worker --loglevel=info -P solo
 celery -A backend.app.celery_app beat --loglevel=info
+
+# Option B: Directly via venv binary:
+.\venv\Scripts\celery.exe -A backend.app.celery_app worker --loglevel=info -P solo
+.\venv\Scripts\celery.exe -A backend.app.celery_app beat --loglevel=info
 ```
 
 ---

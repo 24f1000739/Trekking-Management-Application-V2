@@ -743,7 +743,7 @@ const AdminDashboardView = {
             try {
                 const res = await axios.post('/api/admin/reports/monthly');
                 lastReport.value = res.data.data;
-                toast.trigger("Monthly activity report generated successfully.");
+                toast.trigger(res.data.message || "Monthly activity report generated successfully.");
             } catch (err) {
                 toast.trigger(err.response?.data?.message || "Failed to generate report.", "danger");
             } finally {
@@ -755,7 +755,7 @@ const AdminDashboardView = {
             remindersLoading.value = true;
             try {
                 const res = await axios.post('/api/admin/tasks/run-daily-reminders');
-                toast.trigger(`Dispatched reminders for upcoming treks.`);
+                toast.trigger(res.data?.message || `Dispatched reminders for upcoming treks.`);
             } catch (err) {
                 toast.trigger(err.response?.data?.message || "Failed to run reminders.", "danger");
             } finally {

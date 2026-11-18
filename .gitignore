@@ -11,6 +11,7 @@ __pycache__/
 
 # Local environment & virtual environments
 .env
+.env.*
 .venv/
 venv/
 env/
@@ -36,6 +37,8 @@ exports/*.csv
 backend/exports/*.csv
 reports/*.html
 backend/reports/*.html
+sent_emails/
+backend/sent_emails/
 
 # Node / Frontend build artifacts (if applicable)
 node_modules/

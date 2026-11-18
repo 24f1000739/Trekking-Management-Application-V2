@@ -20,6 +20,11 @@ class TestConfig(Config):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     WTF_CSRF_ENABLED = False
     SECRET_KEY = 'test-secret-key-tasks'
+    MAIL_SERVER = 'localhost'
+    MAIL_PORT = 1025
+    MAIL_USE_TLS = False
+    MAIL_USERNAME = None
+    MAIL_PASSWORD = None
 
 
 class TasksTestCase(unittest.TestCase):
@@ -103,6 +108,10 @@ class TasksTestCase(unittest.TestCase):
         admin_notif = Notification.query.filter_by(user_id=self.admin.id, notification_type='success').first()
         self.assertIsNotNone(admin_notif)
         self.assertIn('Monthly Activity Report Ready', admin_notif.title)
+
+        # Check configured email recipient included
+        self.assertIn('recipients', result)
+        self.assertIn('riteshsah2804@gmail.com', result['recipients'])
 
     def test_csv_export_task(self):
         """User-triggered async job exports booking history as CSV with required columns."""

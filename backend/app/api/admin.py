@@ -418,7 +418,9 @@ def monthly_report_action():
     # Run the job synchronously or as task
     try:
         result = generate_monthly_report()
-        return api_response(data=result, message="Monthly report generated successfully.")
+        recipients_str = ", ".join(result.get('recipients', []))
+        msg = f"Monthly report generated and emailed to {recipients_str}." if recipients_str else "Monthly report generated successfully."
+        return api_response(data=result, message=msg)
     except Exception as e:
         return api_error(f"Failed to generate report: {e}", status_code=500)
 
@@ -430,6 +432,8 @@ def run_daily_reminders_manual():
     from app.tasks.trek_tasks import send_daily_reminders
     try:
         result = send_daily_reminders()
-        return api_response(data=result, message="Daily reminders dispatched successfully.")
+        recipients_str = ", ".join(result.get('recipients', []))
+        msg = f"Daily reminders dispatched and summary emailed to {recipients_str}." if recipients_str else "Daily reminders dispatched successfully."
+        return api_response(data=result, message=msg)
     except Exception as e:
         return api_error(f"Failed to run daily reminders: {e}", status_code=500)

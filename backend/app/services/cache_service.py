@@ -27,7 +27,8 @@ class CacheService:
                 redis_url,
                 socket_connect_timeout=0.8,
                 socket_timeout=0.8,
-                decode_responses=True
+                decode_responses=True,
+                protocol=2
             )
             self.redis_client.ping()
             logger.info("Connected to Redis successfully.")

@@ -101,14 +101,15 @@ def load_user(user_id):
 
 
 def seed_admin(app):
-    """Programmatically create exactly one initial Admin if absent."""
+    """Programmatically create exactly one initial Admin if absent, or sync configured admin email."""
     from app.models.user import User
 
+    configured_email = app.config.get('ADMIN_EMAIL', 'admin@trekking.com')
     admin = User.query.filter_by(role='admin').first()
     if not admin:
         admin_user = User(
             name=app.config.get('ADMIN_NAME', 'System Administrator'),
-            email=app.config.get('ADMIN_EMAIL', 'admin@trekking.com'),
+            email=configured_email,
             phone='9876543210',
             role='admin',
             is_active=True,
@@ -117,5 +118,8 @@ def seed_admin(app):
         )
         admin_user.set_password(app.config.get('ADMIN_PASSWORD', 'Admin@123'))
         db.session.add(admin_user)
+        db.session.commit()
+    elif admin.email != configured_email and configured_email != 'admin@trekking.com':
+        admin.email = configured_email
         db.session.commit()
 

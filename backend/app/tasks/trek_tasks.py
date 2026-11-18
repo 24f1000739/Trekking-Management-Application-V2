@@ -9,6 +9,7 @@ from app.models.user import User
 from app.models.trek import Trek
 from app.models.booking import Booking
 from app.models.notification import Notification
+from app.services.email_service import send_email
 from config import Config
 
 logger = logging.getLogger(__name__)
@@ -65,7 +66,7 @@ def send_daily_reminders():
             )
             db.session.add(notification)
 
-            # 2. Simulated / Webhook / Email / SMS delivery
+            # 2. Webhook / Email / SMS delivery
             webhook_url = os.environ.get('GOOGLE_CHAT_WEBHOOK_URL')
             if webhook_url:
                 try:
@@ -75,12 +76,71 @@ def send_daily_reminders():
                 except Exception as ex:
                     logger.warning(f"[GCHAT WEBHOOK FAILED] {ex}")
 
-            logger.info(f"[EMAIL/SMS/GCHAT DISPATCHED] To: {user.email} (Phone: {user.phone}) | Subject: {title} | Body: {message[:120]}...")
+            # Send Email reminder via SMTP
+            send_email(
+                to_email=user.email,
+                subject=title,
+                body_content=message,
+                is_html=False
+            )
+
+            logger.info(f"[REMINDER DISPATCHED] To: {user.email} (Phone: {user.phone}) | Subject: {title}")
             reminders_sent += 1
 
+    # Also notify Admin / Designated recipient (riteshsah2804@gmail.com)
+    target_email = getattr(Config, 'REPORT_RECIPIENT_EMAIL', 'riteshsah2804@gmail.com')
+    admin_recipients = set()
+    for admin in User.query.filter_by(role='admin').all():
+        if admin.email:
+            admin_recipients.add(admin.email)
+    if target_email:
+        admin_recipients.add(target_email)
+
+    if upcoming_treks:
+        summary_items = []
+        for t in upcoming_treks:
+            cnt = t.participant_count()
+            summary_items.append(
+                f"• {t.name} ({t.location}) - Starts: {t.start_date.strftime('%Y-%m-%d')} | Confirmed Trekkers: {cnt} | Meeting: {t.meeting_point or 'TBA'} | Instructions: {t.instructions or 'Standard gear required'}"
+            )
+        admin_subject = f"Daily Trek Reminders Dispatch Summary ({now.strftime('%b %d, %Y')})"
+        admin_body = (
+            f"Hello Administrator,\n\n"
+            f"Daily reminder check completed for {now.strftime('%b %d, %Y')}.\n\n"
+            f"Total User Reminders Transmitted: {reminders_sent}\n\n"
+            f"Upcoming Expeditions Departing within 48 Hours:\n" +
+            "\n".join(summary_items) +
+            f"\n\nAll notifications have been processed and dispatched."
+        )
+    else:
+        admin_subject = f"Daily Trek Reminders Status Check ({now.strftime('%b %d, %Y')})"
+        admin_body = (
+            f"Hello Administrator,\n\n"
+            f"Daily reminder check completed for {now.strftime('%b %d, %Y')}.\n\n"
+            f"No treks are scheduled to depart within the 48-hour window today.\n"
+            f"Active reminders dispatched: {reminders_sent}.\n\n"
+            f"All trekking routes, schedules, and bookings are up to date."
+        )
+
+    admin_delivery = {}
+    for a_email in admin_recipients:
+        success, msg = send_email(
+            to_email=a_email,
+            subject=admin_subject,
+            body_content=admin_body,
+            is_html=False
+        )
+        admin_delivery[a_email] = {'success': success, 'message': msg}
+        logger.info(f"[DAILY REMINDER ADMIN NOTIFICATION] To: {a_email} | Status: {msg} | Subject: {admin_subject}")
+
     db.session.commit()
-    logger.info(f"Daily reminders complete. Dispatched {reminders_sent} reminder(s).")
-    return {'reminders_sent': reminders_sent, 'timestamp': datetime.now(timezone.utc).isoformat()}
+    logger.info(f"Daily reminders complete. Dispatched {reminders_sent} reminder(s). Notified {len(admin_recipients)} admin recipient(s).")
+    return {
+        'reminders_sent': reminders_sent,
+        'recipients': list(admin_recipients),
+        'admin_delivery': admin_delivery,
+        'timestamp': datetime.now(timezone.utc).isoformat()
+    }
 
 
 @celery.task(name='app.tasks.trek_tasks.generate_monthly_report')
@@ -195,8 +255,9 @@ def generate_monthly_report():
     with open(report_filepath, 'w', encoding='utf-8') as f:
         f.write(html_content)
 
-    # Create notification for admin user(s)
+    # Create notification for admin user(s) and collect recipients
     admin_users = User.query.filter_by(role='admin').all()
+    recipients = set()
     for admin in admin_users:
         notif = Notification(
             user_id=admin.id,
@@ -206,8 +267,26 @@ def generate_monthly_report():
             link=f"/reports/{report_filename}"
         )
         db.session.add(notif)
-        logger.info(f"[EMAIL DISPATCHED TO ADMIN] To: {admin.email} | Subject: Monthly Trekking Activity Report ({report_month}) | Report: {report_filepath}")
+        if admin.email:
+            recipients.add(admin.email)
+
+    target_email = getattr(Config, 'REPORT_RECIPIENT_EMAIL', 'riteshsah2804@gmail.com')
+    if target_email:
+        recipients.add(target_email)
+
     db.session.commit()
+
+    # Dispatch email with HTML monthly report to all recipients
+    email_delivery_results = {}
+    for email_addr in recipients:
+        success, msg = send_email(
+            to_email=email_addr,
+            subject=f"Monthly Trekking Activity Report ({report_month})",
+            body_content=html_content,
+            is_html=True
+        )
+        email_delivery_results[email_addr] = {'success': success, 'message': msg}
+        logger.info(f"[EMAIL DISPATCHED TO ADMIN] To: {email_addr} | Status: {msg} | Report: {report_filepath}")
 
     logger.info(f"Report written to {report_filepath}")
     return {
@@ -215,7 +294,9 @@ def generate_monthly_report():
         'filepath': report_filepath,
         'generated_at': now.isoformat(),
         'completed_treks': completed_treks,
-        'total_bookings': total_bookings
+        'total_bookings': total_bookings,
+        'recipients': list(recipients),
+        'email_delivery': email_delivery_results
     }
 
 

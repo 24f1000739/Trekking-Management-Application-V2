@@ -1,17 +1,17 @@
 import os
 import sys
+import importlib
 
+# Ensure backend directory is in sys.path
 backend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'backend'))
 if backend_dir not in sys.path:
     sys.path.insert(0, backend_dir)
 
-# Ensure 'app' imports the package from backend/app
-if 'app' in sys.modules and getattr(sys.modules['app'], '__file__', None) == os.path.abspath(__file__):
-    del sys.modules['app']
+# Ensure 'app' in sys.modules points to the backend/app package, not this file
+backend_app = importlib.import_module('backend.app')
+sys.modules['app'] = backend_app
 
-import app as backend_app_module
-
-create_app = backend_app_module.create_app
+create_app = backend_app.create_app
 app = create_app()
 
 if __name__ == '__main__':
